@@ -65,3 +65,5 @@ module.exports = {
   addContact,
   updateContact,
 };
+
+//TODO: fix 500 statu error
