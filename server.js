@@ -1,11 +1,16 @@
 const mongoose = require('mongoose');
 
+mongoose.set('strictQuery', false);
+
 const app = require('./app');
 
 const { PORT, DB_HOST } = process.env;
 
 mongoose
-  .connect(DB_HOST)
+  .connect(DB_HOST, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(
     app.listen(PORT, () => {
       console.log(`Database connection successful`);
