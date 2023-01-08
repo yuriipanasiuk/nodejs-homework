@@ -2,10 +2,16 @@ const express = require('express');
 const router = express.Router();
 const controllers = require('../../controllers/contactsControllers');
 const validation = require('../../schemas/validation');
-const { contactsSchema, favoriteSchema } = require('../../schemas/validationSchema');
+const { contactsSchema, statusContactSchema } = require('../../schemas/validationSchema');
 
-const { getContacts, getContactById, addNewContact, deleteContact, updateContact, updateFavorite } =
-  controllers;
+const {
+  getContacts,
+  getContactById,
+  addNewContact,
+  deleteContact,
+  updateContact,
+  updateStatusContact,
+} = controllers;
 
 router.get('/', getContacts);
 
@@ -17,6 +23,6 @@ router.delete('/:contactId', deleteContact);
 
 router.put('/:contactId', validation(contactsSchema), updateContact);
 
-router.patch('/:contactId/favorite', validation(favoriteSchema), updateFavorite);
+router.patch('/:contactId/favorite', validation(statusContactSchema), updateStatusContact);
 
 module.exports = router;

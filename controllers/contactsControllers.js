@@ -68,7 +68,7 @@ const deleteContact = async (req, res, next) => {
   }
 };
 
-const updateFavorite = async (req, res, next) => {
+const updateStatusContact = async (req, res, next) => {
   try {
     const { contactId } = req.params;
     const { favorite } = req.body;
@@ -90,5 +90,5 @@ module.exports = {
   getContactById,
   updateContact,
   deleteContact,
-  updateFavorite,
+  updateStatusContact,
 };
