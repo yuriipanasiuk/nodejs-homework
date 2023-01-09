@@ -1,5 +1,5 @@
 const Contact = require('../models/contact');
-const MyError = require('../myErrors');
+const MyError = require('../helpers/myErrors');
 
 const getContacts = async (req, res, next) => {
   try {
@@ -61,7 +61,6 @@ const deleteContact = async (req, res, next) => {
 
     res.json({
       message: `contact deleted`,
-      contact,
     });
   } catch (error) {
     next(error);
