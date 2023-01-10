@@ -11,7 +11,15 @@ const statusContactValidationSchema = Joi.object({
   favorite: Joi.boolean().required(),
 });
 
+const userValidationSchema = Joi.object({
+  password: Joi.string().required(),
+  email: Joi.string().required(),
+  subscription: Joi.string(),
+  token: Joi.string(),
+});
+
 module.exports = {
   contactValidationSchema,
   statusContactValidationSchema,
+  userValidationSchema,
 };
