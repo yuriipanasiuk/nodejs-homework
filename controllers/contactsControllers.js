@@ -1,9 +1,15 @@
 const Contact = require('../models/contact');
 const MyError = require('../helpers/myErrors');
-
+//TODO: add filtre favorite
 const getContacts = async (req, res, next) => {
   try {
-    const contacts = await Contact.find({});
+    const { _id } = req.user;
+    const { page = 1, limit = 20 } = req.query;
+    const skip = (page - 1) * limit;
+    const contacts = await Contact.find({ owner: _id }, '', {
+      skip,
+      limit: Number(limit),
+    }).populate('owner', '_id name email');
     res.json(contacts);
   } catch (error) {
     next(error);
@@ -42,7 +48,8 @@ const updateContact = async (req, res, next) => {
 
 const addNewContact = async (req, res, next) => {
   try {
-    const result = await Contact.create(req.body);
+    const { _id } = req.user;
+    const result = await Contact.create({ ...req.body, owner: _id });
 
     res.status(201).json(result);
   } catch (error) {

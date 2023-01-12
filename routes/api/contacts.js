@@ -13,12 +13,13 @@ const {
   contactValidationSchema,
   statusContactValidationSchema,
 } = require('../../schemas/validationSchema');
+const auth = require('../../middlewares/auth');
 
-router.get('/', getContacts);
+router.get('/', auth, getContacts);
 
 router.get('/:contactId', getContactById);
 
-router.post('/', validation(contactValidationSchema), addNewContact);
+router.post('/', auth, validation(contactValidationSchema), addNewContact);
 
 router.delete('/:contactId', deleteContact);
 
