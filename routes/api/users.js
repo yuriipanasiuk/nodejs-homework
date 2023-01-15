@@ -2,7 +2,10 @@ const express = require('express');
 const router = express.Router();
 
 const validation = require('../../schemas/validation');
-const { userValidationSchema } = require('../../schemas/validationSchema');
+const {
+  userValidationSchema,
+  subscriptionUserValidationSchema,
+} = require('../../schemas/validationSchema');
 const auth = require('../../middlewares/auth');
 const {
   registerUser,
@@ -14,8 +17,8 @@ const {
 
 router.post('/register', validation(userValidationSchema), registerUser);
 router.post('/login', validation(userValidationSchema), loginUser);
-router.post('/logout', auth, validation(userValidationSchema), logoutUser);
+router.post('/logout', auth, logoutUser);
 router.get('/current', auth, getCurrentUser);
-router.patch('/', auth, updateUserSubscription);
+router.patch('/', auth, validation(subscriptionUserValidationSchema), updateUserSubscription);
 
 module.exports = router;

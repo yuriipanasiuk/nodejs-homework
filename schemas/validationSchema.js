@@ -18,8 +18,13 @@ const userValidationSchema = Joi.object({
   token: Joi.string(),
 });
 
+const subscriptionUserValidationSchema = Joi.object({
+  subscription: Joi.string().valid('starter', 'pro', 'business').required(),
+});
+
 module.exports = {
   contactValidationSchema,
   statusContactValidationSchema,
   userValidationSchema,
+  subscriptionUserValidationSchema,
 };

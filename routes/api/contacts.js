@@ -15,16 +15,13 @@ const {
 } = require('../../schemas/validationSchema');
 const auth = require('../../middlewares/auth');
 
-router.get('/', auth, getContacts);
+router.use(auth);
 
+router.get('/', getContacts);
 router.get('/:contactId', getContactById);
-
-router.post('/', auth, validation(contactValidationSchema), addNewContact);
-
+router.post('/', validation(contactValidationSchema), addNewContact);
 router.delete('/:contactId', deleteContact);
-
 router.put('/:contactId', validation(contactValidationSchema), updateContact);
-
 router.patch(
   '/:contactId/favorite',
   validation(statusContactValidationSchema),

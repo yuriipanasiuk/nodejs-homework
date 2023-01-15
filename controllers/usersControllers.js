@@ -1,5 +1,5 @@
-const bscrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const bscrypt = require('bcryptjs');
 
 const User = require('../models/user');
 const MyError = require('../helpers/myErrors');
@@ -8,20 +8,24 @@ const { SECRET_KEY } = process.env;
 
 const registerUser = async (req, res, next) => {
   try {
-    const { email, password, subscription } = req.body;
+    const { email, password, subscription = 'starter' } = req.body;
+
     const user = await User.findOne({ email });
 
     if (user) {
       return next(new MyError('Email in use', 409));
     }
 
-    const hashPassword = bscrypt.hashSync(password, bscrypt.genSaltSync(10));
-    await User.create({ email, subscription, password: hashPassword });
+    await User.create({
+      email,
+      subscription,
+      password,
+    });
 
     res.status(201).json({
       user: {
         email,
-        subscription: 'starter',
+        subscription,
       },
     });
   } catch (error) {
@@ -31,7 +35,7 @@ const registerUser = async (req, res, next) => {
 
 const loginUser = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, subscription = 'startet' } = req.body;
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -55,7 +59,7 @@ const loginUser = async (req, res, next) => {
       token,
       user: {
         email,
-        subscription: 'starter',
+        subscription,
       },
     });
   } catch (error) {
