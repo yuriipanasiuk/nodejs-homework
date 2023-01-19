@@ -8,7 +8,7 @@ const { SECRET_KEY } = process.env;
 
 const registerUser = async (req, res, next) => {
   try {
-    const { email, password, subscription = 'starter' } = req.body;
+    const { email, password } = req.body;
 
     const user = await User.findOne({ email });
 
@@ -18,9 +18,10 @@ const registerUser = async (req, res, next) => {
 
     await User.create({
       email,
-      subscription,
       password,
     });
+
+    const { subscription } = await User.findOne({ email });
 
     res.status(201).json({
       user: {
@@ -35,7 +36,7 @@ const registerUser = async (req, res, next) => {
 
 const loginUser = async (req, res, next) => {
   try {
-    const { email, password, subscription = 'startet' } = req.body;
+    const { email, password } = req.body;
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -54,6 +55,8 @@ const loginUser = async (req, res, next) => {
 
     const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' });
     await User.findByIdAndUpdate(user._id, { token });
+
+    const { subscription } = user;
 
     res.json({
       token,
@@ -94,12 +97,12 @@ const getCurrentUser = async (req, res, next) => {
 
 const updateUserSubscription = async (req, res, next) => {
   try {
-    const { subscription } = req.body;
     const { _id } = req.user;
 
-    const result = await User.findByIdAndUpdate(_id, { subscription }, { new: true });
+    const result = await User.findByIdAndUpdate(_id, req.body, { new: true });
+    const { email, subscription } = result;
 
-    res.json(result);
+    res.json({ email, subscription });
   } catch (error) {
     next(error);
   }
