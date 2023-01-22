@@ -4,7 +4,6 @@ const gravatar = require('gravatar');
 const path = require('path');
 const fs = require('fs').promises;
 const Jimp = require('jimp');
-const { v4: uuidv4 } = require('uuid');
 
 const User = require('../models/user');
 const MyError = require('../helpers/myErrors');
@@ -118,30 +117,30 @@ const updateUserSubscription = async (req, res, next) => {
   }
 };
 
-const avatarDir = path.join(process.cwd(), 'public', 'avatars');
+const storageImage = path.join(process.cwd(), 'public', 'avatars');
 
 const updateAvatar = async (req, res, next) => {
-  const { path: tempUpload, originalname } = req.file;
+  const { path: tempUpload, filename } = req.file;
   const { _id: id } = req.user;
 
-  const imageName = `${uuidv4()}_${originalname}`;
-
   try {
-    const resultUpload = path.join(avatarDir, imageName);
+    const resultUpload = path.join(storageImage, filename);
 
     Jimp.read(tempUpload, (err, image) => {
-      if (err) next(err);
-      image.resize(250, 250).write(resultUpload);
+      if (err) {
+        next(err);
+      }
+      image.resize(250, 250).write(tempUpload);
     });
 
-    await fs.rename(tempUpload, resultUpload);
+    fs.rename(tempUpload, resultUpload);
+    const avatarURL = path.join('public', 'avatar', filename);
 
-    const avatarURL = path.join('public', 'avatars', imageName);
     await User.findByIdAndUpdate(id, { avatarURL });
 
     res.json({ avatarURL });
   } catch (error) {
-    await fs.unlink(path);
+    fs.unlink(tempUpload);
     next(error);
   }
 };
