@@ -154,5 +154,3 @@ module.exports = {
   updateUserSubscription,
   updateAvatar,
 };
-
-//TODO: resize avatar by using jimp
