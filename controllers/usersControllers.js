@@ -8,6 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const User = require('../models/user');
 const MyError = require('../helpers/myErrors');
+const sendEmail = require('../helpers/sendEmail');
 
 const { SECRET_KEY } = process.env;
 
@@ -22,14 +23,24 @@ const registerUser = async (req, res, next) => {
     }
 
     const avatarURL = gravatar.url(email);
+    const verificationToken = uuidv4();
 
     await User.create({
       email,
       password,
       avatarURL,
+      verificationToken,
     });
 
     const { subscription } = await User.findOne({ email });
+
+    const mail = {
+      to: email,
+      subject: 'email confirmation',
+      html: `<a target = '_blank' href='http://localhost:3000/api/users/verify/${verificationToken}'>Hi, please verify your email address by clicking the link</a>`,
+    };
+
+    await sendEmail(mail);
 
     res.status(201).json({
       user: {
@@ -49,7 +60,7 @@ const loginUser = async (req, res, next) => {
   try {
     const user = await User.findOne({ email });
 
-    if (!user) {
+    if (!user || !user.verify) {
       return next(new MyError('Email or password is wrong', 401));
     }
 
@@ -146,6 +157,55 @@ const updateAvatar = async (req, res, next) => {
   }
 };
 
+const verifyEmail = async (req, res, next) => {
+  const { verificationToken } = req.params;
+
+  try {
+    const user = await User.findOne({ verificationToken });
+
+    if (!user) {
+      return next(new MyError('User not found', 404));
+    }
+
+    await User.findByIdAndUpdate(user._id, { verificationToken: null, verify: true });
+
+    res.json({
+      message: 'Verification successful',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const resendingEmail = async (req, res, next) => {
+  const { email } = req.body;
+  const verificationToken = uuidv4();
+
+  try {
+    const user = await User.findOne({ email });
+
+    const mail = {
+      to: email,
+      subject: 'email confirmation',
+      html: `<a target = '_blank' href='http://localhost:3000/api/users/verify/${verificationToken}'>Hi, please verify your email address by clicking the link</a>`,
+    };
+
+    if (!user.verify) {
+      await sendEmail(mail);
+
+      return res.json({
+        message: 'Verification email sent',
+      });
+    }
+
+    res.status(400).json({
+      message: 'Verification has already been passed',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -153,4 +213,6 @@ module.exports = {
   getCurrentUser,
   updateUserSubscription,
   updateAvatar,
+  verifyEmail,
+  resendingEmail,
 };
