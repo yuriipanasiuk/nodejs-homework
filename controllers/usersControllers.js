@@ -8,7 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const User = require('../models/user');
 const MyError = require('../helpers/myErrors');
-const sendEmail = require('../helpers/sendEmail');
+const mail = require('../helpers/mail');
 
 const { SECRET_KEY } = process.env;
 
@@ -34,13 +34,7 @@ const registerUser = async (req, res, next) => {
 
     const { subscription } = await User.findOne({ email });
 
-    const mail = {
-      to: email,
-      subject: 'email confirmation',
-      html: `<a target = '_blank' href='http://localhost:3000/api/users/verify/${verificationToken}'>Hi, please verify your email address by clicking the link</a>`,
-    };
-
-    await sendEmail(mail);
+    mail(email, verificationToken);
 
     res.status(201).json({
       user: {
@@ -179,19 +173,13 @@ const verifyEmail = async (req, res, next) => {
 
 const resendingEmail = async (req, res, next) => {
   const { email } = req.body;
-  const verificationToken = uuidv4();
 
   try {
     const user = await User.findOne({ email });
+    const { verificationToken, verify } = user;
 
-    const mail = {
-      to: email,
-      subject: 'email confirmation',
-      html: `<a target = '_blank' href='http://localhost:3000/api/users/verify/${verificationToken}'>Hi, please verify your email address by clicking the link</a>`,
-    };
-
-    if (!user.verify) {
-      await sendEmail(mail);
+    if (!verify) {
+      mail(email, verificationToken);
 
       return res.json({
         message: 'Verification email sent',
